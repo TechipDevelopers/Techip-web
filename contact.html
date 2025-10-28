@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact – Techip Block</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <style>
+    .contact-page { padding: 2rem 0; display:flex; justify-content:center; }
+    .contact-card {
+      width: min(900px, 94%);
+      background: linear-gradient(180deg, rgba(43,10,61,0.9), rgba(15,8,30,0.9));
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 28px rgba(2,6,23,0.6);
+      color: var(--text);
+    }
+
+    .contact-card h2 { margin-top:0; }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: flex-start;
+      flex-wrap:wrap;
+    }
+
+    .form-field {
+      flex: 1 1 260px;
+      display:flex;
+      flex-direction:column;
+      text-align:left;
+    }
+
+    label { font-size:0.92rem; color:var(--muted); margin-bottom:0.4rem; }
+
+    input[type="text"], select, textarea {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+    }
+
+    textarea { min-height: 140px; max-height: 420px; }
+
+    .form-actions {
+      margin-top: 1rem;
+      display:flex;
+      gap:0.75rem;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .btn {
+      background: linear-gradient(180deg,var(--accent), #2f7be6);
+      color: white;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight:600;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:0.5rem;
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .note { color:var(--muted); font-size:0.88rem; margin-top:0.5rem; }
+
+    @media(max-width:720px) {
+      .form-row { flex-direction:column; }
+      .form-field { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner container">
+      <div class="brand">
+        <img src="assets/logo1.png" alt="Techip Block Logo" class="site-logo" />
+        <h1 class="site-title">Techip Android Filter</h1>
+      </div>
+
+      <button id="hamburger" class="hamburger" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">
+        <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+      </button>
+
+      <nav id="site-nav" class="site-nav" aria-hidden="true">
+        <div class="nav-panel" role="dialog" aria-modal="true" aria-label="Main menu">
+          <button id="nav-close" class="nav-close" aria-label="Close menu">&times;</button>
+          <ul class="nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="screenshots.html">Screenshots</a></li>
+            <li><a href="download.html">Download</a></li>
+            <li><a href="install.html">installation guide</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="nav-backdrop" data-action="close"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container contact-page">
+      <div class="contact-card" role="region" aria-labelledby="contact-title">
+        <h2 id="contact-title">Contact Us</h2>
+
+        <p class="note">Fill the form below to send us a message. Select whether you are a new customer or an existing customer, then write your message. Clicking "Send message" will open your email client pre-filled to send the message.</p>
+
+        <form id="contact-form" onsubmit="return handleSubmit(event)" novalidate>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" placeholder="Your full name" required />
+            </div>
+
+            <div class="form-field">
+              <label for="type">I am a</label>
+              <select id="type" name="type" required>
+                <option value="">Select...</option>
+                <option value="New customer">New customer</option>
+                <option value="Existing customer">Existing customer</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:1rem;">
+            <div class="form-field" style="flex:2 1 100%;">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Write your message here" required></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn" type="submit">Send message</button>
+            <button class="btn" type="button" onclick="clearForm()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);">Clear</button>
+            <div class="note" id="form-status" aria-live="polite"></div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    &copy; 2025 Techip developers. All rights reserved.
+  </footer>
+
+  <script>
+    // Sends form by opening the user's email client with a prefilled mailto:
+    function handleSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const type = document.getElementById('type').value;
+      const message = document.getElementById('message').value.trim();
+      const status = document.getElementById('form-status');
+
+      if (!name) {
+        status.textContent = 'Please enter your name.';
+        return false;
+      }
+      if (!type) {
+        status.textContent = 'Please select new customer or existing customer.';
+        return false;
+      }
+      if (!message) {
+        status.textContent = 'Please enter your message.';
+        return false;
+      }
+
+      status.textContent = '';
+
+      const to = 'tp4751243@gmail.com';
+      const subject = encodeURIComponent(`Techip Block contact from ${name} — ${type}`);
+      const bodyLines = [
+        `Name: ${name}`,
+        `Type: ${type}`,
+        '',
+        'Message:',
+        message,
+        '',
+        '---',
+        'Sent from Techip Block contact form'
+      ];
+      const body = encodeURIComponent(bodyLines.join('\n'));
+
+      // Use mailto to open user's email client prefilled.
+      // The actual sending will be performed by the user's mail client.
+      const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+      window.location.href = mailto;
+
+      // Inform user the email client should open
+      status.textContent = 'Opening your email client to send the message...';
+
+      return false;
+    }
+
+    function clearForm() {
+      document.getElementById('contact-form').reset();
+      document.getElementById('form-status').textContent = '';
+    }
+  </script>
+
+  <script src="scripts/main.js"></script>
+</body>
+</html>
