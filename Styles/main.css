@@ -28,35 +28,37 @@ body{
    Header (center brand to viewport)
    ------------------------- */
 
-/* Header wrapper spans full viewport so brand can be centered to the page */
+/* Site header wrapper */
 .site-header {
-  padding: 10px 0;
-  background: var(--bg);
-  color: var(--text);
   position: relative;
   z-index: 1000;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* header-inner is the full-width bar and contains a centered internal container */
+/* header-inner: full-width bar that contains a centered internal container */
 .header-inner {
   position: relative;
   width: 100%;
-  max-width: none;    /* allow full-bleed so brand can anchor to viewport center */
+  max-width: none;    /* allow full-bleed for viewport-centering */
   margin: 0;
   padding: 0 1rem;
-  height: 64px;       /* consistent header height for centering */
+  height: 84px;       /* reserve vertical space for brand (tune if needed) */
   display: block;
+  box-sizing: border-box;
 }
 
-/* internal container keeps nav and other controls constrained */
+/* internal container keeps nav and buttons constrained */
 .header-inner .container {
   max-width: var(--container);
   margin: 0 auto;
-  position: relative; /* positioning context for controls inside the centered area */
+  position: relative; /* positioning context for contained controls */
   height: 100%;
+  display: flex;
+  align-items: center;
 }
 
-/* Brand centered to the viewport (not to the constrained container) */
+/* Brand centered to viewport (absolute) */
 .brand {
   position: absolute;
   left: 50vw;                 /* viewport center */
@@ -129,7 +131,7 @@ body{
 .hamburger[aria-expanded="true"] .hamburger-inner::before { transform: rotate(90deg) translateX(-0.5px); top:0; }
 .hamburger[aria-expanded="true"] .hamburger-inner::after { opacity:0; transform: scaleX(0); }
 
-/* If you have a nav-close or other right control, pin to the right (inside container) */
+/* Right-side control (if any) */
 .nav-close, .nav-close-button {
   position: absolute;
   right: 1rem;
@@ -143,7 +145,7 @@ body{
   pointer-events: none;
 }
 
-/* Nav panel (drawer) - hidden by default using display:none so it never floats */
+/* Nav panel (drawer) - hidden by default */
 .site-nav { position:fixed; inset:0; z-index:1200; display:none; font-family:inherit; }
 .site-nav[aria-hidden="false"] { display:flex; pointer-events:auto; }
 .site-nav[aria-hidden="true"]  { display:none; pointer-events:none; }
@@ -184,6 +186,27 @@ body{
 .nav-list a:hover, .nav-list a:focus { background:rgba(255,255,255,0.02); outline:none; }
 
 /* -------------------------
+   Spacer to prevent overlap
+   ------------------------- */
+
+/* Add <div class="header-spacer" aria-hidden="true"></div> directly after </header> in your HTML */
+.header-spacer {
+  height: 84px;     /* match .header-inner height */
+  width: 100%;
+}
+
+/* On small screens the header becomes auto height and spacer is hidden */
+@media (max-width: 640px) {
+  .header-inner { height: auto; padding: 0.6rem 1rem; }
+  .brand { position: static; transform: none; margin: 0 auto; }
+  .header-spacer { display: none; }
+  .hamburger { left: 0.8rem; }
+  .site-logo { max-width:160px; width:40vw; }
+  .site-title { font-size:16px; }
+  .nav-panel { width:85%; }
+}
+
+/* -------------------------
    Page layout pieces
    ------------------------- */
 
@@ -222,17 +245,6 @@ body{
 
 /* footer */
 .site-footer{padding:1.25rem 0;border-top:1px solid rgba(255,255,255,.03);color:var(--muted);text-align:center}
-
-/* responsive */
-@media(max-width:640px){
-  .site-logo { max-width:160px; width:40vw; }
-  .site-title { font-size:16px; }
-  .nav-panel { width:85%; }
-  .header-inner { height:auto; padding:0.6rem 1rem; }
-  /* on small screens let brand sit in normal flow so it avoids overlap */
-  .brand { position: static; transform: none; margin: 0 auto; }
-  .hamburger { left: 0.8rem; }
-}
 
 /* Info box styling for About and How It Works */
 .info-box {
@@ -279,4 +291,4 @@ body{
     color: var(--text);
     text-align: center;
   }
-                                           }
+}
