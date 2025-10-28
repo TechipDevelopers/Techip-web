@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Support Techip – Donate</title>
+  <link rel="stylesheet" href="Styles/main.css" />
+  <style>
+    .donation-page {
+      padding: 2rem 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .donation-card {
+      width: min(900px, 94%);
+      background: linear-gradient(180deg, rgba(43,10,61,0.9), rgba(15,8,30,0.9));
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 28px rgba(2,6,23,0.6);
+      color: var(--text);
+      text-align: center;
+    }
+
+    .donation-card h2 {
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+
+    .donation-card p {
+      margin: 1rem 0 2rem;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .donate-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: #0070ba;
+      color: white;
+      padding: 0.75rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .donate-btn:hover {
+      background: #005ea6;
+    }
+
+    .donate-btn img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner container">
+      <div class="brand">
+        <a href="index.html" aria-label="Go to homepage">
+          <img src="Assets/logo1.png" alt="Techip Block Logo" class="site-logo" />
+        </a>
+        <h1 class="site-title">Techip Android Filter</h1>
+      </div>
+
+      <button id="hamburger" class="hamburger" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">
+        <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+      </button>
+
+      <nav id="site-nav" class="site-nav" aria-hidden="true">
+        <div class="nav-panel" role="dialog" aria-modal="true" aria-label="Main menu">
+          <button id="nav-close" class="nav-close" aria-label="Close menu">&times;</button>
+          <ul class="nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="screenshots.html">Screenshots</a></li>
+            <li><a href="download.html">Download</a></li>
+            <li><a href="install.html">Install</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="donation.html">Donate</a></li>
+          </ul>
+        </div>
+        <div class="nav-backdrop" data-action="close"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container donation-page">
+      <div class="donation-card">
+        <h2>Support Techip</h2>
+        <p>
+          Every day, I dedicate time and energy to building tools that help families, educators, and communities create safer digital spaces. Techip is more than just an app — it's a mission to empower people with simple, effective solutions. If you’ve found value in this work or want to help it grow, your support means the world. Even a small donation helps me continue developing, improving, and offering this service to those who need it most.
+        </p>
+
+        <a class="donate-btn" href="https://www.paypal.com/donate?hosted_button_id=YOUR_BUTTON_ID" target="_blank" rel="noopener noreferrer">
+          <img src="Assets/paypal.png" alt="PayPal logo" />
+          Donate with PayPal
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    &copy; 2025 Techip developers. All rights reserved.
+  </footer>
+
+  <script src="Scripts/main.js"></script>
+</body>
+</html>
