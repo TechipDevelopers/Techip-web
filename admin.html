@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Techip Admin Panel</title>
+  <style>
+    body{font-family:system-ui,Arial;margin:0;padding:1rem;background:#071022;color:#e6eef8}
+    .wrap{max-width:1100px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between}
+    button{padding:.45rem .75rem;border-radius:6px;border:0;background:#4f9cff;color:#fff;cursor:pointer}
+    .card{background:rgba(255,255,255,0.02);padding:.75rem;border-radius:8px;margin:.5rem 0}
+    .device-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:0.75rem}
+    .controls{display:flex;gap:.5rem;flex-wrap:wrap}
+    textarea{width:100%;height:6rem}
+    input,select{padding:.4rem;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    .muted{color:#9fb0c8;font-size:.9rem}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1 style="margin:.25rem 0">Techip Admin</h1>
+        <div class="muted">Manage devices, send commands, and view status</div>
+      </div>
+      <div>
+        <button id="btnSignOut" style="display:none">Sign out</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="authSection" class="card">
+        <h3>Sign in (admin)</h3>
+        <div id="authMsg" class="muted">Sign in with an admin account</div>
+        <div style="margin-top:.5rem">
+          <input id="email" placeholder="admin email" type="email" />
+          <input id="password" placeholder="password" type="password" style="margin-left:.5rem" />
+          <button id="btnSignIn">Sign in</button>
+        </div>
+      </section>
+
+      <section id="adminPanel" style="display:none">
+        <div class="card"
+          <h3>Devices</h3>
+          <div id="deviceList" class="device-list"></div>
+        </div>
+
+        <div class="card">
+          <h3>Quick command</h3>
+          <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem">
+            <input id="cmdDeviceId" placeholder="deviceId (leave empty to paste later)" />
+            <select id="cmdType">
+              <option value="applyPolicy">applyPolicy</option>
+              <option value="remoteLock">remoteLock</option>
+              <option value="testToast">testToast</option>
+            </select>
+            <button id="btnSendCmd">Send command</button>
+          </div>
+          <label class="muted">Payload (JSON)</label>
+          <textarea id="cmdPayload">{ "message": "Hello from admin" }</textarea>
+          <div id="cmdResult" class="muted" style="margin-top:.5rem"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase SDK (compat mode for easy copy/paste) -->
+  <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js"></script>
+<!-- START: Replace your current script block with everything below -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Paste your Firebase web config here (verify storageBucket is *.appspot.com)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAyupAnVxfe5_yv8aFbDSnRlZOGhDN4og8",
+    authDomain: "techip-block.firebaseapp.com",
+    projectId: "techip-block",
+    storageBucket: "techip-block.appspot.com",
+    messagingSenderId: "574468853695",
+    appId: "1:574468853695:web:f72e4215b108c012df9b0a",
+    measurementId: "G-7X03VZVS28"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // UI refs (ensure these IDs exist in the page)
+  const authSection = document.getElementById('authSection');
+  const adminPanel = document.getElementById('adminPanel');
+  const btnSignIn = document.getElementById('btnSignIn');
+  const btnSignOut = document.getElementById('btnSignOut');
+  const emailInput = document.getElementById('email');
+  const passInput = document.getElementById('password');
+  const authMsg = document.getElementById('authMsg');
+  const deviceList = document.getElementById('deviceList');
+  const btnSendCmd = document.getElementById('btnSendCmd');
+  const cmdDeviceId = document.getElementById('cmdDeviceId');
+  const cmdType = document.getElementById('cmdType');
+  const cmdPayload = document.getElementById('cmdPayload');
+  const cmdResult = document.getElementById('cmdResult');
+
+  let currentUser = null;
+  let devicesUnsub = null;
+
+  function show(msg){ authMsg.textContent = msg; console.log('[admin] ' + msg); }
+
+  // Admin check: expects a document at /admins/{uid}
+  async function isAdmin(uid){
+    try {
+      if(!uid) return false;
+      const doc = await db.collection('admins').doc(uid).get();
+      return doc.exists;
+    } catch (err) {
+      console.error('isAdmin error', err);
+      return false;
+    }
+  }
+
+  // Auth state handling
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (user) {
+      btnSignOut.style.display = 'inline-block';
+      show('Signed in as ' + user.email + ' — checking admin status...');
+      const ok = await isAdmin(user.uid);
+      if (!ok) {
+        show('This account is not an admin. Sign out and use an admin account.');
+        adminPanel.style.display = 'none';
+        return;
+      }
+      show('Admin verified. Loading devices...');
+      authSection.style.display = 'none';
+      adminPanel.style.display = 'block';
+      attachDeviceListener();
+    } else {
+      authSection.style.display = 'block';
+      adminPanel.style.display = 'none';
+      btnSignOut.style.display = 'none';
+      show('Sign in with an admin account');
+      if (devicesUnsub) { devicesUnsub(); devicesUnsub = null; }
+    }
+  });
+
+  // Sign-in click handler with extra logging
+  btnSignIn.addEventListener('click', async (ev) => {
+    try {
+      const email = (emailInput.value || '').trim();
+      const pass = passInput.value || '';
+      if (!email || !pass) { show('Enter both email and password'); return; }
+      show('Signing in...');
+      // disable button while signing in
+      btnSignIn.disabled = true;
+      const cred = await auth.signInWithEmailAndPassword(email, pass);
+      console.log('Signed in result', cred);
+      btnSignIn.disabled = false;
+      // onAuthStateChanged will handle UI changes
+    } catch (e) {
+      console.error('Sign-in error', e);
+      btnSignIn.disabled = false;
+      show('Sign-in error: ' + (e && e.message ? e.message : e));
+      alert('Sign-in failed: ' + (e && e.message ? e.message : e));
+    }
+  });
+
+  btnSignOut.addEventListener('click', async () => {
+    try {
+      await auth.signOut();
+      show('Signed out');
+    } catch (e) {
+      console.error('Sign-out error', e);
+      show('Sign-out error: ' + e.message);
+    }
+  });
+
+  function attachDeviceListener(){
+    if (devicesUnsub) devicesUnsub();
+    devicesUnsub = db.collection('devices').orderBy('registeredAt', 'desc')
+      .onSnapshot((snap) => {
+        deviceList.innerHTML = '';
+        snap.forEach(doc => {
+          const d = doc.data();
+          const id = doc.id;
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div><strong>${d.deviceModel || 'Unknown model'}</strong> <span class="muted">${d.ownerUid || ''}</span></div>
+            <div class="muted">deviceId: ${id}</div>
+            <div class="muted">lastSeen: ${d.lastSeen ? d.lastSeen.toDate().toLocaleString() : '—'}</div>
+            <div style="margin-top:.5rem" class="controls">
+              <button data-id="${id}" class="btnCmd" data-cmd="testToast">Test Toast</button>
+              <button data-id="${id}" class="btnCmd" data-cmd="remoteLock">Remote Lock</button>
+              <button data-id="${id}" class="btnCmd" data-cmd="applyPolicy">Apply Policy</button>
+            </div>
+          `;
+          deviceList.appendChild(card);
+        });
+      }, (err) => {
+        console.error('Devices listener error', err);
+        show('Devices load error: ' + err.message);
+      });
+  }
+
+  // Command helpers
+  async function sendCommand(deviceId, type, payload){
+    try {
+      cmdResult.textContent = 'Sending...';
+      const dd = {
+        type,
+        payload,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'pending'
+      };
+      await db.collection('devices').doc(deviceId).collection('commands').add(dd);
+      cmdResult.textContent = 'Command queued for device ' + deviceId;
+    } catch (e) {
+      console.error('sendCommand error', e);
+      cmdResult.textContent = 'Error: ' + (e && e.message ? e.message : e);
+    }
+  }
+
+  // Device buttons and quick command
+  document.addEventListener('click', async (ev) => {
+    const t = ev.target;
+    if (t.classList.contains('btnCmd')) {
+      const id = t.dataset.id;
+      const cmd = t.dataset.cmd;
+      let payload = {};
+      if (cmd === 'testToast') payload = { message: 'Hello from admin' };
+      if (cmd === 'applyPolicy') payload = { disableCamera: true };
+      await sendCommand(id, cmd, payload);
+    }
+  });
+
+  btnSendCmd.addEventListener('click', async () => {
+    const id = (cmdDeviceId.value || '').trim();
+    if (!id) { cmdResult.textContent = 'Enter deviceId or click a device to auto-fill'; return; }
+    let payload;
+    try { payload = JSON.parse(cmdPayload.value || '{}'); } catch(e) { cmdResult.textContent = 'Invalid JSON payload'; return; }
+    await sendCommand(id, cmdType.value, payload);
+  });
+
+  // click-to-fill deviceId
+  deviceList.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button[data-id]');
+    if (!btn) return;
+    cmdDeviceId.value = btn.dataset.id;
+    cmdResult.textContent = 'deviceId filled: ' + btn.dataset.id;
+  });
+
+  // Helpful console check: verify auth object exists
+  console.log('Firebase initialized. auth available:', !!auth, 'db available:', !!db);
+</script>
+</body>
+</html>
