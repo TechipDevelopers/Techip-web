@@ -25,25 +25,26 @@ body{
 .container{max-width:var(--container);margin:0 auto;padding:1rem}
 
 /* -------------------------
-   Header (center brand to viewport)
+   Header (center brand to viewport) & layout
    ------------------------- */
 
-/* Site header wrapper */
 .site-header {
   position: relative;
   z-index: 1000;
   background: var(--bg);
   color: var(--text);
+  width:100%;
+  box-sizing:border-box;
 }
 
 /* header-inner: full-width bar that contains a centered internal container */
 .header-inner {
   position: relative;
   width: 100%;
-  max-width: none;    /* allow full-bleed for viewport-centering */
+  max-width: none;    /* allow full-bleed so brand can anchor to viewport center */
   margin: 0;
   padding: 0 1rem;
-  height: 84px;       /* reserve vertical space for brand (tune if needed) */
+  height: 96px;       /* reserve vertical space for brand (tune if needed) */
   display: block;
   box-sizing: border-box;
 }
@@ -73,19 +74,20 @@ body{
   text-align: center;
 }
 
-/* Logo and title */
+/* Logo and title constraints to avoid clipping */
 .site-logo {
-  max-width:220px;
-  width:45vw;
-  height:auto;
-  display:block;
+  width: auto;
+  max-width: 220px;
+  max-height: 56px;    /* prevents chopping; adjust if your image is larger */
+  height: auto;
+  display: block;
 }
 .site-title {
-  margin:0;
-  font-size:20px;
-  color:var(--text);
-  font-weight:700;
-  line-height:1;
+  margin: 0;
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* Hamburger pinned to the left inside the centered container */
@@ -188,10 +190,9 @@ body{
 /* -------------------------
    Spacer to prevent overlap
    ------------------------- */
-
 /* Add <div class="header-spacer" aria-hidden="true"></div> directly after </header> in your HTML */
 .header-spacer {
-  height: 84px;     /* match .header-inner height */
+  height: 96px;     /* match .header-inner height */
   width: 100%;
 }
 
@@ -201,7 +202,7 @@ body{
   .brand { position: static; transform: none; margin: 0 auto; }
   .header-spacer { display: none; }
   .hamburger { left: 0.8rem; }
-  .site-logo { max-width:160px; width:40vw; }
+  .site-logo { max-width:160px; max-height:48px; width:auto; }
   .site-title { font-size:16px; }
   .nav-panel { width:85%; }
 }
