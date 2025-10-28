@@ -8,17 +8,20 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="header-inner container">
-<div class="brand">
-  <a href="index.html" aria-label="Go to homepage">
-    <img src="Assets/logo1.png" alt="Techip Block Logo" class="site-logo" />
-  </a>
-  <h1 class="site-title">Techip Android Filter</h1>
-</div>
+   <header class="site-header">
+  <div class="header-inner">
+    <!-- viewport-centered brand (absolute positioned by CSS) -->
+    <div class="brand">
+      <a href="index.html" aria-label="Go to homepage">
+        <img src="Assets/logo1.png" alt="Techip Block Logo" class="site-logo" />
+      </a>
+      <h1 class="site-title">Techip Android Filter</h1>
+    </div>
+
+    <!-- constrained container for navigation and controls -->
+    <div class="container header-controls">
       <button id="hamburger" class="hamburger" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">
-        <span class="hamburger-box">
-          <span class="hamburger-inner"></span>
-        </span>
+        <span class="hamburger-box"><span class="hamburger-inner"></span></span>
       </button>
 
       <nav id="site-nav" class="site-nav" aria-hidden="true">
@@ -30,7 +33,7 @@
             <li><a href="features.html">Features</a></li>
             <li><a href="screenshots.html">Screenshots</a></li>
             <li><a href="download.html">Download</a></li>
-            <li><a href="install.html">installation guide</a></li>
+            <li><a href="install.html">Install</a></li>
             <li><a href="contact.html">Contact</a></li>
             <li><a href="donation.html">Donate</a></li>
           </ul>
@@ -38,7 +41,8 @@
         <div class="nav-backdrop" data-action="close"></div>
       </nav>
     </div>
-  </header>
+  </div>
+   </header>
 
   <main>
    <section id="about" class="container info-box">
